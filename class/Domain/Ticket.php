@@ -1,7 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Domain;
 
+use WP_Query;
 
 class Ticket
 {
@@ -37,6 +38,8 @@ class Ticket
             'show_in_menu'        => true,
             'hierarchical'        => false,
             'exclude_from_search' => false,
+            'show_in_rest'        => true,
+            'rest_base'           => 'soluby_ticket',
             'supports'            => array('title', 'editor', 'exerpt', 'thumbnail', 'page-attributes'),
             'capability_type'     => 'post',
         );
@@ -47,11 +50,11 @@ class Ticket
     {
         $args = array(
             'post_type'      => 'soluby_ticket',
-            'posts_per_page' => 1
+            'posts_per_page' => -1
 
         );
 
-        return new \WP_Query($args);
+        return new WP_Query($args);
     }
 }
 new Ticket();
