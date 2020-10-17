@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Domain\Ticket;
-// use App\Tools\SearchTools;
 use App\Templater;
 
 class Init
@@ -11,26 +10,19 @@ class Init
 
     private $temp;
     private $tickets;
-    // private $search;
 
     public function __construct()
     {
         $this->temp = new Templater();
         add_action('init', [$this, 'create_posttypes']);
-        // add_action('admin_post_soluby_handle_form', [$this, 'soluby_form_hangling']);
-        // add_shortcode('soluby_search', [$this, 'soluby_search_shortcode']);
         add_shortcode('soluby_tickets_list',  [$this, 'soluby_tickets_listing']);
+        add_shortcode('soluby_tickets_created',  [$this, 'soluby_tickets_create']);
+        add_action('admin_post_soluby_add_ticket',  [$this, 'soluby_add_ticket']);
     }
 
     public function create_posttypes()
     {
         $this->tickets = new Ticket();
-        // $this->search = new SearchTools();
-    }
-
-    public function soluby_search_shortcode()
-    {
-        return $this->temp->soluby_get_template("ticket-search.php");
     }
 
     public function soluby_tickets_listing()
@@ -48,18 +40,25 @@ class Init
         return $content;
     }
 
-    /**
-     * 1-
-     * Vérification du nonce, si tous est validé, va chercher les résultats
-     * dans la fonction search_tickets
-     */
-    // public function soluby_form_handling()
-    // {
-    //     if (!isset($_POST['_nonce']) || !wp_verify_nonce($_POST['_nonce'], 'form-submit')) {
-    //         wp_redirect('/');
-    //     } else {
-    //         $results = $this->search->search_tickets($_POST['s']);
-    //         var_dump($results->posts);
-    //     }
-    // }
+    public function soluby_tickets_create()
+    {
+        return $this->temp->soluby_get_template("ticket-created.php");
+    }
+
+    public function soluby_add_ticket()
+    {
+        $nouveau_suivi = [
+            'post_title' => "Ticket: " . $_POST['suivi']['courriel'],
+            'post_content' => $_POST['suivi']['commentaires'],
+            'post_status' => "publish",
+            'post_date' => date('Y-m-d'),
+            'post_type' => "soluby_ticket",
+        ];
+
+        $post_id = wp_insert_post($nouveau_suivi);
+
+        update_post_meta($post_id, "soluby_email", sanitize_text_field($_POST['suivi']['courriel']));
+
+        wp_redirect("/page-d-exemple");
+    }
 }
